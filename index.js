@@ -18,9 +18,9 @@ async function run (){
     try {
         await client.connect();
         const database = client.db('bridalDress');
-        const serviceCollection = database.collection('homeDress')
-        const myOrderCollection = database.collection('myBooking')
-        const customerReview = database.collection('review')
+        const serviceCollection = database.collection('homeDress');
+        const myOrderCollection = database.collection('myBooking');
+        const customerReview = database.collection('review');
         const usersCollection = database.collection('users');
        
 
@@ -60,9 +60,14 @@ async function run (){
             const query = {uid: uid};
             const result = await myOrderCollection.find(query).toArray();
             res.json(result);
+        });
 
-            
-        })
+        app.get('/cart', async(req, res)=>{
+            // const uid = req.params.uid;
+            // const query = {uid: uid};
+            const result = await myOrderCollection.find({}).toArray();
+            res.json(result);
+        });
 
         
         // add data to cart collection with additional info
@@ -91,7 +96,20 @@ async function run (){
             console.log(result);
           });
 
+        
+
         // make admin
+
+        app.get('/users/:email', async(req, res) =>{
+            const email = req.params.email;
+            const query = {email: email};
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if(user?.role === 'admin'){
+                isAdmin= true;
+            }
+            res.json({admin: isAdmin})
+        })
 
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -102,7 +120,6 @@ async function run (){
 
         app.put('/users', async(req,res) =>{
             const user = req.body;
-            console.log('put', user);
             const filter = {email: user.email};
             const options = {upsert: true};
             const updateDoc = { $set: user };
@@ -112,9 +129,10 @@ async function run (){
 
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
+            console.log('put', user);
             const filter = { email: user.email };
             const updateDoc = { $set:{role:'admin'} };
-            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            const result = await usersCollection.updateOne(filter, updateDoc);
             res.json(result);
         });
 
