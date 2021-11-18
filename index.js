@@ -85,12 +85,18 @@ async function run (){
         });
 
         app.get('/cart', async(req, res)=>{
-            // const uid = req.params.uid;
-            // const query = {uid: uid};
             const result = await myOrderCollection.find({}).toArray();
             res.json(result);
         });
 
+        // Delete order
+        app.delete('/cart/:id', async (req, res) =>{
+            const id = req.params.id
+            const query = {_id: ObjectId(id)}
+            const result = await myOrderCollection.deleteOne(query)
+            console.log(' deleting user id' , result);
+            res.json(result)
+        })
         
         // add data to cart collection with additional info
         app.post('/booking/add', async(req, res)=>{
